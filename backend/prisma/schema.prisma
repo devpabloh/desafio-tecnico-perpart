@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  name      String
+  password  String
+  avatarUrl String?
+  role      Role      @default(USER)
+  
+  // Relacionamentos 1:N 
+  products   Product[]
+  categories Category[]
+  
+  // Favoritos 
+  favorites  Favorite[]
+  
+  // Auditoria 
+  auditLogs  AuditLog[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  imageUrl    String? 
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  categories  Category[]
+  favorites   Favorite[]
+
+  createdAt   DateTime @default(now())
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  
+  products  Product[]
+
+  createdAt DateTime @default(now())
+}
+
+model Favorite {
+  id        String  @id @default(uuid())
+  userId    String
+  productId String
+  user      User    @relation(fields: [userId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId]) 
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  action    String
+  resource  String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  timestamp DateTime @default(now())
+}
