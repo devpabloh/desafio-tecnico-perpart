@@ -1,6 +1,6 @@
 import { Injectable, ConflictException } from '@nestjs/common';
 import { hash } from 'bcryptjs';
-import type { UsersRepository } from '../repositories/users-repository';
+import { UsersRepository } from '../repositories/users-repository';
 
 @Injectable()
 export class CreateUserService {

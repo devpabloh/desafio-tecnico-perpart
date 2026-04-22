@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import type { ProductsRepository } from '../repositories/products-repository';
+import { ProductsRepository } from '../repositories/products-repository';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Injectable()

@@ -50,4 +50,50 @@ export class PrismaProductsRepository implements ProductsRepository {
   async delete(id: string): Promise<void> {
     await this.prisma.product.delete({ where: { id } });
   }
+
+  async update(
+    id: string,
+    data: Prisma.ProductUncheckedUpdateInput,
+  ): Promise<Product> {
+    return this.prisma.product.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async isFavoritedByUser(productId: string, userId: string): Promise<boolean> {
+    const favorite = await this.prisma.favorite.findUnique({
+      where: { userId_productId: { userId, productId } },
+    });
+    return !!favorite;
+  }
+
+  async addFavorite(productId: string, userId: string): Promise<void> {
+    await this.prisma.favorite.create({
+      data: { productId, userId },
+    });
+  }
+
+  async removeFavorite(productId: string, userId: string): Promise<void> {
+    await this.prisma.favorite.delete({
+      where: { userId_productId: { userId, productId } },
+    });
+  }
+
+  async listFavoritesByUser(userId: string): Promise<Product[]> {
+    const favorites = await this.prisma.favorite.findMany({
+      where: { userId },
+      include: {
+        product: {
+          include: {
+            categories: true,
+            user: { select: { name: true } },
+          },
+        },
+      },
+      orderBy: { id: 'desc' },
+    });
+
+    return favorites.map((item) => item.product);
+  }
 }

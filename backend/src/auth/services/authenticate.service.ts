@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
 import { UsersRepository } from 'src/modules/users/repositories/users-repository';
+import type { AuthenticateDto } from 'src/auth/controllers/auth.controller';
 
 @Injectable()
 export class AuthenticateService {
@@ -10,7 +11,7 @@ export class AuthenticateService {
     private jwtService: JwtService,
   ) {}
 
-  async execute({ email, password }) {
+  async execute({ email, password }: AuthenticateDto) {
     const user = await this.usersRepository.findByEmail(email);
 
     if (!user) {

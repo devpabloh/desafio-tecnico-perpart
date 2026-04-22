@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from 'src/infra/database/prisma/prisma.service';
-import { UsersRepository } from '../users-repository';
+import { FindManyUsersParams, UsersRepository } from '../users-repository';
 
 @Injectable()
 export class PrismaUsersRepository implements UsersRepository {
@@ -17,5 +17,32 @@ export class PrismaUsersRepository implements UsersRepository {
 
   async findById(id: string): Promise<User | null> {
     return await this.prisma.user.findUnique({ where: { id } });
+  }
+
+  async findMany({ page, query }: FindManyUsersParams): Promise<User[]> {
+    return this.prisma.user.findMany({
+      where: query
+        ? {
+            OR: [
+              { name: { contains: query, mode: 'insensitive' } },
+              { email: { contains: query, mode: 'insensitive' } },
+            ],
+          }
+        : undefined,
+      orderBy: { createdAt: 'desc' },
+      take: 20,
+      skip: (page - 1) * 20,
+    });
+  }
+
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<User> {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.user.delete({ where: { id } });
   }
 }
